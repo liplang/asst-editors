@@ -1,0 +1,90 @@
+{
+  "scope": "source.lip - string - comment",
+  "completions": [
+    {
+      "trigger": "flow",
+      "contents": "flow ${1:Main}(${2}) -> ${3:any} {\n  return ${0:null}\n}"
+    },
+    {
+      "trigger": "flowvoid",
+      "contents": "flow ${1:Main}(${2}) -> void {\n  $0\n}"
+    },
+    {
+      "trigger": "fn",
+      "contents": "fn ${1:name}(${2:value}: ${3:number}) -> ${4:number} {\n  ${0:value}\n}"
+    },
+    {
+      "trigger": "lambda",
+      "contents": "fn (${1:x}: ${2:number}) -> ${3:number} { ${0:x} }"
+    },
+    {
+      "trigger": "if",
+      "contents": "if ${1:condition} {\n  $2\n} else {\n  $0\n}"
+    },
+    {
+      "trigger": "match",
+      "contents": "match ${1:value} {\n  ${2:null} => ${3:0},\n  _ => ${0:1}\n}"
+    },
+    {
+      "trigger": "for",
+      "contents": "for ${1:item} in ${2:items} {\n  $0\n}"
+    },
+    {
+      "trigger": "claimfor",
+      "contents": "${1:results} = claim()\nfor ${2:item} in ${3:items} parallel {\n  $1 <+ ${0:item}\n}"
+    },
+    {
+      "trigger": "carry",
+      "contents": "${1:total} = for ${2:item} in ${3:items} with ${4:acc} = ${5:0} {\n  next ${0:acc + item}\n}"
+    },
+    {
+      "trigger": "comp",
+      "contents": "[${1:item} for ${2:item} in ${3:items} if ${0:true}]"
+    },
+    {
+      "trigger": "importlip",
+      "contents": "import lip \"${1:lib/module.lip}\" as ${0:module}"
+    },
+    {
+      "trigger": "importpy",
+      "contents": "import python \"${1:math}\" as ${0:math}"
+    },
+    {
+      "trigger": "importgo",
+      "contents": "import go \"${1:strings}\" as ${0:strings}"
+    },
+    {
+      "trigger": "importhost",
+      "contents": "import host \"${1:service@1}\" as ${0:service}"
+    },
+    {
+      "trigger": "perform",
+      "contents": "${1:result} = perform ${2:module}.${3:operation}(${0})"
+    },
+    {
+      "trigger": "effect",
+      "contents": "${1:proposal} = effect ${2:module}.${3:operation}(${0})"
+    },
+    {
+      "trigger": "pipe",
+      "contents": "${1:value} |> ${2:stage}(${0})"
+    },
+    {
+      "trigger": "text",
+      "contents": "\"\"\"\n$0\n\"\"\""
+    },
+    "len",
+    "str",
+    "range",
+    "map",
+    "fold",
+    "fail",
+    "concat",
+    "slice",
+    "keys",
+    "has",
+    "put",
+    "split",
+    "parse_number"
+  ]
+}

@@ -1,0 +1,29 @@
+[
+  {
+    "label": "LIP: Check file",
+    "command": "lipcheck",
+    "args": ["$ZED_FILE"],
+    "cwd": "$ZED_DIRNAME",
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false,
+    "reveal": "always"
+  },
+  {
+    "label": "LIP: Run file",
+    "command": "lipc",
+    "args": ["run", "$ZED_FILE"],
+    "cwd": "$ZED_DIRNAME",
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false,
+    "reveal": "always"
+  },
+  {
+    "label": "LIP: Build executable",
+    "command": "lipc",
+    "args": ["build", "-o", "$ZED_FILE.out", "$ZED_FILE"],
+    "cwd": "$ZED_DIRNAME",
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false,
+    "reveal": "always"
+  }
+]

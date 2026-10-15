@@ -1,0 +1,126 @@
+{
+  "name": "LIP",
+  "scopeName": "source.lip",
+  "fileTypes": [
+    "lip"
+  ],
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#strings"
+    },
+    {
+      "include": "#code"
+    }
+  ],
+  "repository": {
+    "comments": {
+      "name": "comment.line.number-sign.lip",
+      "begin": "#",
+      "end": "$"
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.triple.lip",
+          "begin": "\"\"\"",
+          "end": "\"\"\"",
+          "patterns": [
+            {
+              "include": "#escapes"
+            }
+          ]
+        },
+        {
+          "name": "string.quoted.double.lip",
+          "begin": "\"",
+          "end": "\"|$",
+          "patterns": [
+            {
+              "include": "#escapes"
+            }
+          ]
+        }
+      ]
+    },
+    "escapes": {
+      "patterns": [
+        {
+          "name": "constant.character.escape.lip",
+          "match": "\\\\(?:[\"\\\\nrt]|u\\{[0-9a-fA-F]{1,6}\\})"
+        },
+        {
+          "name": "invalid.illegal.escape.lip",
+          "match": "\\\\."
+        }
+      ]
+    },
+    "code": {
+      "patterns": [
+        {
+          "match": "\\b(fn|flow)\\s+([A-Za-z_][A-Za-z0-9_]*)",
+          "captures": {
+            "1": {
+              "name": "keyword.declaration.lip"
+            },
+            "2": {
+              "name": "entity.name.function.lip"
+            }
+          }
+        },
+        {
+          "match": "(:|->)\\s*(any|bool|number|string|list|object|function|effect|void|null)\\b(\\?)?",
+          "captures": {
+            "1": {
+              "name": "punctuation.separator.type.lip"
+            },
+            "2": {
+              "name": "storage.type.lip"
+            },
+            "3": {
+              "name": "keyword.operator.optional.lip"
+            }
+          }
+        },
+        {
+          "name": "keyword.control.lip",
+          "match": "\\b(?:import|as|flow|fn|return|if|else|match|for|in|parallel|break|continue|with|next|effect|perform|export|void)\\b"
+        },
+        {
+          "name": "constant.language.lip",
+          "match": "\\b(?:true|false|null)\\b"
+        },
+        {
+          "name": "support.function.builtin.lip",
+          "match": "(?<![\\w.])(?:claim|len|str|range|map|fold|fail|concat|slice|keys|has|put|split|parse_number)\\b"
+        },
+        {
+          "name": "entity.name.function.call.lip",
+          "match": "\\b[A-Za-z_][A-Za-z0-9_]*(?=\\s*\\()"
+        },
+        {
+          "name": "constant.numeric.lip",
+          "match": "\\b(?:0|[1-9][0-9]*)(?:\\.[0-9]+)?(?:[eE][+-]?[0-9]+)?\\b"
+        },
+        {
+          "name": "keyword.operator.lip",
+          "match": "<\\+|->|=>|==|!=|<=|>=|&&|\\|\\||//|\\*\\*|\\*/|\\|>|[=+*/%!<>?\\-]"
+        },
+        {
+          "name": "punctuation.section.lip",
+          "match": "[()\\[\\]{}]"
+        },
+        {
+          "name": "punctuation.separator.lip",
+          "match": "[.,:;]"
+        },
+        {
+          "name": "punctuation.separator.continuation.lip",
+          "match": "\\\\$"
+        }
+      ]
+    }
+  }
+}

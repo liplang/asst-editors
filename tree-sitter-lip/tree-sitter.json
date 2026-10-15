@@ -1,0 +1,4 @@
+{
+  "grammars": [{"name": "lip", "camelcase": "Lip", "scope": "source.lip", "path": ".", "file-types": ["lip"]}],
+  "metadata": {"version": "1.0.0", "description": "Structural editing grammar for LIP 1.0"}
+}

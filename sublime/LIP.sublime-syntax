@@ -1,0 +1,124 @@
+%YAML 1.2
+---
+{
+  "name": "LIP",
+  "file_extensions": [
+    "lip"
+  ],
+  "scope": "source.lip",
+  "version": 2,
+  "contexts": {
+    "main": [
+      {
+        "match": "#",
+        "scope": "punctuation.definition.comment.lip",
+        "push": [
+          {
+            "meta_scope": "comment.line.number-sign.lip"
+          },
+          {
+            "match": "$",
+            "pop": true
+          }
+        ]
+      },
+      {
+        "match": "\"\"\"",
+        "scope": "punctuation.definition.string.begin.lip",
+        "push": "triple"
+      },
+      {
+        "match": "\"",
+        "scope": "punctuation.definition.string.begin.lip",
+        "push": "string"
+      },
+      {
+        "match": "\\b(fn|flow)\\s+([A-Za-z_][A-Za-z0-9_]*)",
+        "captures": {
+          1: "keyword.declaration.lip",
+          2: "entity.name.function.lip"
+        }
+      },
+      {
+        "match": "(:|->)\\s*(any|bool|number|string|list|object|function|effect|void|null)\\b(\\?)?",
+        "captures": {
+          1: "punctuation.separator.type.lip",
+          2: "storage.type.lip",
+          3: "keyword.operator.optional.lip"
+        }
+      },
+      {
+        "match": "\\b(?:import|as|flow|fn|return|if|else|match|for|in|parallel|break|continue|with|next|effect|perform|export|void)\\b",
+        "scope": "keyword.control.lip"
+      },
+      {
+        "match": "\\b(?:true|false|null)\\b",
+        "scope": "constant.language.lip"
+      },
+      {
+        "match": "(?<![\\w.])(?:claim|len|str|range|map|fold|fail|concat|slice|keys|has|put|split|parse_number)\\b",
+        "scope": "support.function.builtin.lip"
+      },
+      {
+        "match": "\\b[A-Za-z_][A-Za-z0-9_]*(?=\\s*\\()",
+        "scope": "entity.name.function.call.lip"
+      },
+      {
+        "match": "\\b(?:0|[1-9][0-9]*)(?:\\.[0-9]+)?(?:[eE][+-]?[0-9]+)?\\b",
+        "scope": "constant.numeric.lip"
+      },
+      {
+        "match": "<\\+|->|=>|==|!=|<=|>=|&&|\\|\\||//|\\*\\*|\\*/|\\|>|[=+*/%!<>?\\-]",
+        "scope": "keyword.operator.lip"
+      },
+      {
+        "match": "[()\\[\\]{}]",
+        "scope": "punctuation.section.lip"
+      },
+      {
+        "match": "[.,:;]",
+        "scope": "punctuation.separator.lip"
+      },
+      {
+        "match": "\\\\$",
+        "scope": "punctuation.separator.continuation.lip"
+      }
+    ],
+    "escapes": [
+      {
+        "match": "\\\\(?:[\"\\\\nrt]|u\\{[0-9a-fA-F]{1,6}\\})",
+        "scope": "constant.character.escape.lip"
+      },
+      {
+        "match": "\\\\.",
+        "scope": "invalid.illegal.escape.lip"
+      }
+    ],
+    "triple": [
+      {
+        "meta_scope": "string.quoted.triple.lip"
+      },
+      {
+        "include": "escapes"
+      },
+      {
+        "match": "\"\"\"",
+        "scope": "punctuation.definition.string.end.lip",
+        "pop": true
+      }
+    ],
+    "string": [
+      {
+        "meta_scope": "string.quoted.double.lip"
+      },
+      {
+        "include": "escapes"
+      },
+      {
+        "match": "\"|$",
+        "scope": "punctuation.definition.string.end.lip",
+        "pop": true
+      }
+    ]
+  }
+}

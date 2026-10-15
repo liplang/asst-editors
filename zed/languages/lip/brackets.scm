@@ -1,0 +1,5 @@
+(block "{" @open "}" @close)
+(list "[" @open "]" @close)
+(parentheses "(" @open ")" @close)
+(string "\"" @open "\"" @close)
+(multiline_string "\"\"\"" @open "\"\"\"" @close)

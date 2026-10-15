@@ -1,0 +1,38 @@
+{
+  "name": "lip-language",
+  "displayName": "LIP 1.0",
+  "description": "LIP syntax, snippets, completion, core documentation, symbols, static checks and execution tasks.",
+  "version": "1.0.0",
+  "publisher": "lip-local",
+  "engines": {"vscode": "^1.85.0"},
+  "categories": ["Programming Languages", "Snippets"],
+  "main": "./extension.js",
+  "activationEvents": ["onLanguage:lip"],
+  "capabilities": {"untrustedWorkspaces": {"supported": "limited", "description": "Running the checker and compiler requires a trusted workspace."}},
+  "contributes": {
+    "languages": [{"id": "lip", "aliases": ["LIP", "lip"], "extensions": [".lip"], "configuration": "./language-configuration.json"}],
+    "grammars": [{"language": "lip", "scopeName": "source.lip", "path": "./syntaxes/lip.tmLanguage.json"}],
+    "snippets": [{"language": "lip", "path": "./snippets/lip.json"}],
+    "commands": [
+      {"command": "lip.check", "title": "LIP: Check File"},
+      {"command": "lip.run", "title": "LIP: Run File"},
+      {"command": "lip.build", "title": "LIP: Build Executable"}
+    ],
+    "menus": {"editor/title": [{"command": "lip.run", "when": "resourceLangId == lip && isWorkspaceTrusted", "group": "navigation"}]},
+    "configuration": {
+      "title": "LIP",
+      "properties": {
+        "lip.compilerPath": {"type": "string", "default": "lipc", "scope": "resource", "description": "lipc executable; supports ${workspaceFolder} and ${fileDirname}."},
+        "lip.checkerPath": {"type": "string", "default": "lipcheck", "scope": "resource", "description": "Compile-only checker from editors/tools/lipcheck."},
+        "lip.arguments": {"type": "array", "items": {"type": "string"}, "default": [], "scope": "resource", "description": "Common compiler flags, e.g. [\"-entry\", \"Main\", \"-host\", \"demo\"]. Each argument is a separate array entry."},
+        "lip.runArguments": {"type": "array", "items": {"type": "string"}, "default": [], "scope": "resource", "description": "Run-only flags, e.g. [\"-input\", \"{\\\"name\\\":\\\"Ada\\\"}\"]."},
+        "lip.projectRoot": {"type": "string", "default": "", "scope": "resource", "description": "Static import root; empty uses the source directory. Supports ${workspaceFolder}."},
+        "lip.checkOnSave": {"type": "boolean", "default": false, "scope": "resource", "description": "Compile saved LIP files in trusted workspaces. Checks do not run the Flow; native import discovery may start Go/Python."}
+      }
+    },
+    "configurationDefaults": {"[lip]": {"editor.tabSize": 2, "editor.insertSpaces": true}},
+    "problemMatchers": [
+      {"name": "lip-check", "owner": "lip-task", "fileLocation": "absolute", "pattern": {"regexp": "^(.+):(\\d+):(\\d+): (.*)$", "file": 1, "line": 2, "column": 3, "message": 4}}
+    ]
+  }
+}

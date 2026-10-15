@@ -1,0 +1,48 @@
+{
+  "keywords": [
+    "import",
+    "as",
+    "flow",
+    "fn",
+    "return",
+    "if",
+    "else",
+    "match",
+    "for",
+    "in",
+    "parallel",
+    "break",
+    "continue",
+    "with",
+    "next",
+    "effect",
+    "perform",
+    "export",
+    "void"
+  ],
+  "types": [
+    "any",
+    "bool",
+    "number",
+    "string",
+    "list",
+    "object",
+    "function",
+    "effect"
+  ],
+  "builtins": {
+    "len": "len(value): string/list/object → number; strings count Unicode scalar values.",
+    "str": "str(value): Data → string; other Data uses canonical JSON.",
+    "range": "range(end), range(start, end), range(start, end, step): half-open list of safe integers.",
+    "map": "map(xs, f): list and pure unary function → list, in input order.",
+    "fold": "fold(xs, seed, f): strict left fold; f(accumulator, element).",
+    "fail": "fail(message): stop with E-FAIL; no successful value.",
+    "concat": "concat(a, b): concatenate two lists into a new list.",
+    "slice": "slice(value, start, end): half-open list/string slice; safe nonnegative indices.",
+    "keys": "keys(object): string keys sorted by UTF-8 bytes.",
+    "has": "has(object, key): check whether a string key exists.",
+    "put": "put(object, key, value): return a new object with that field added or replaced.",
+    "split": "split(text, separator): nonempty separator; preserves empty parts.",
+    "parse_number": "parse_number(text): complete ASCII numeric text → finite number."
+  }
+}
