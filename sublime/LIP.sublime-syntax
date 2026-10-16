@@ -60,6 +60,10 @@
         "scope": "support.function.builtin.lip"
       },
       {
+        "match": "(?<![\\w.])(?:native_data|native_release)\\b(?=\\s*\\()",
+        "scope": "support.function.native.lip"
+      },
+      {
         "match": "\\b[A-Za-z_][A-Za-z0-9_]*(?=\\s*\\()",
         "scope": "entity.name.function.call.lip"
       },

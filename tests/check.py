@@ -11,15 +11,37 @@ import zipfile
 from pathlib import Path
 
 EDITORS = Path(__file__).resolve().parents[1]
-REPO = EDITORS.parent
-BIN = REPO / ".build/editors/bin"
+REPO = EDITORS.parent / "lipv1"
+BUILD = Path(os.environ.get("LIP_EDITOR_BUILD", EDITORS / ".build")).resolve()
+BIN = BUILD / "bin"
+LANGUAGE = json.loads((EDITORS / "language.json").read_text())
 
 
 def run(args, **kwargs):
     return subprocess.run([str(arg) for arg in args], text=True, capture_output=True, timeout=90, **kwargs)
 
 
+def snippet(name, values=None):
+    """Fill tab stops as a user would, retaining repeated placeholder values."""
+    body = LANGUAGE["snippets"][name]["body"]
+    text = "\n".join(body) if isinstance(body, list) else body
+    values = dict(values or {})
+
+    def replace(match):
+        index = int(match[1] or match[3])
+        return values.setdefault(index, match[2] or "")
+
+    return re.sub(r"\$\{(\d+)(?::([^}]*))?\}|\$(\d+)", replace, text)
+
+
 class EditorSupport(unittest.TestCase):
+    def test_core_function_names_follow_spec(self):
+        spec = (REPO / "spec/LIP-1.0-SPEC.md").read_text()
+        table = spec.split("### 3.1.", 1)[1].split("核心函数不接受", 1)[0]
+        names = re.findall(r"^\| ([a-z_]+)\(", table, re.MULTILINE)
+        self.assertEqual(set(LANGUAGE["builtins"]), set(names))
+        self.assertTrue(set(LANGUAGE["nativeHelpers"]).isdisjoint(names))
+
     def test_compile_only_and_diagnostics(self):
         with tempfile.TemporaryDirectory(prefix="LIP editor 空格 ") as directory:
             root = Path(directory)
@@ -47,6 +69,70 @@ class EditorSupport(unittest.TestCase):
             self.assertEqual(run([BIN / "lipcheck", "-project", root, module]).returncode, 0)
             self.assertEqual(run([BIN / "lipcheck"]).returncode, 2)
 
+    def test_default_main_and_explicit_entry(self):
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / "entry.lip"
+            source.write_text('flow Helper() -> number { return 7 }\n'
+                              'flow Main() -> number { return 42 }\n')
+            self.assertEqual(run([BIN / "lipcheck", source]).returncode, 0)
+            for arguments, expected in [([], 42), (["-entry", "Helper"], 7)]:
+                executed = run([BIN / "lipc", "run", *arguments, source])
+                self.assertEqual(executed.returncode, 0, executed.stderr)
+                self.assertEqual(json.loads(executed.stdout), expected)
+            self.assertIn("E-ENTRY:", run([BIN / "lipcheck", "-entry", "Unknown", source]).stderr)
+            source.write_text('flow Helper() -> number { return missing }\n'
+                              'flow Main() -> number { return 42 }\n')
+            self.assertIn("E-NAME:", run([BIN / "lipcheck", source]).stderr)
+
+    def test_index_slice_snippets_and_native_helper_shadowing(self):
+        expressions = {"slice": snippet("Slice"), "reverse": snippet("Reverse"),
+                       "indices": snippet("Index list"),
+                       "step": "slice(items, null, null, -2)",
+                       "clipped": "items[-100:100]", "last": "items[-1]",
+                       "unicode": '"A𐀀é"[::-1]',
+                       "shadowed": "native_release(native_data(2))"}
+        fields = ",\n".join(f"{name}: {expr}" for name, expr in expressions.items())
+        with tempfile.TemporaryDirectory(prefix="LIP selection 空格 ") as directory:
+            source = Path(directory) / "selections.lip"
+            source.write_text('fn native_data(x:number)->number { x+1 }\n'
+                              'fn native_release(x:number)->number { x+10 }\n'
+                              f'flow Main()->object {{ items=range(5); return {{{fields}}} }}\n')
+            checked = run([BIN / "lipcheck", source])
+            self.assertEqual(checked.returncode, 0, checked.stderr)
+            executed = run([BIN / "lipc", "run", source])
+            self.assertEqual(executed.returncode, 0, executed.stderr)
+            self.assertEqual(json.loads(executed.stdout), {
+                "slice": [0, 1, 2, 3, 4], "reverse": [4, 3, 2, 1, 0],
+                "indices": [0, 4], "step": [4, 2, 0], "clipped": [0, 1, 2, 3, 4],
+                "last": 4, "unicode": "́e𐀀A", "shadowed": 13,
+            })
+            executable = Path(directory) / "compiled selections"
+            built = run([BIN / "lipc", "build", "-o", executable, source], cwd=EDITORS)
+            self.assertEqual(built.returncode, 0, built.stdout + built.stderr)
+            compiled = run([executable])
+            self.assertEqual(compiled.returncode, 0, compiled.stderr)
+            self.assertEqual(json.loads(compiled.stdout), json.loads(executed.stdout))
+
+    def test_operation_and_snapshot_snippets(self):
+        perform = snippet("Perform", {2: "console", 3: "write", 0: '"editor snippet"'})
+        snapshot = snippet("Claim snapshot")
+        proposal = snippet("Proposal", {2: "console", 3: "write", 0: '"proposal snippet"'})
+        saved = snippet("Perform proposal", {1: "second"})
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / "operations.lip"
+            source.write_text(snippet("Host import", {1: "console", 0: "console"}) + '\nflow Main()->object {\n'
+                              f'facts=claim()\nfacts <+ 7\n{perform}\n{proposal}\n{saved}\n{snapshot}\n'
+                              'complete=facts\nreturn {count:len(complete),seen:len(seen)}\n}\n')
+            checked = run([BIN / "lipcheck", "-host", "demo", source])
+            self.assertEqual(checked.returncode, 0, checked.stderr)
+            executed = run([BIN / "lipc", "run", "-host", "demo", source])
+            self.assertEqual(executed.returncode, 0, executed.stderr)
+            result = json.loads(executed.stdout)
+            self.assertEqual(result["count"], 1)
+            self.assertIn(result["seen"], [0, 1])
+            self.assertIn("editor snippet", executed.stderr)
+            self.assertIn("proposal snippet", executed.stderr)
+
     @unittest.skipUnless(shutil.which("emacs"), "Emacs is not installed")
     def test_emacs_strings_indentation_completion_and_errors(self):
         script = r'''
@@ -67,6 +153,17 @@ class EditorSupport(unittest.TestCase):
     (when (assoc "Functions" (lip--imenu-index)) (error "fake function in imenu"))
     (goto-char (point-max)) (insert "par")
     (unless (member "parse_number" (nth 2 (lip-completion-at-point))) (error "missing completion")))
+  (with-temp-buffer
+    (insert "flow Main() -> list {\n  xs = range(5)\n  ys = native_data(xs)\n  return ys[::-1]\n}\n")
+    (lip-mode) (font-lock-ensure)
+    (goto-char (point-min)) (search-forward "native_data") (backward-char)
+    (unless (eq (get-text-property (point) 'face) 'font-lock-builtin-face) (error "missing native helper highlighting"))
+    (goto-char (point-max)) (insert "native_")
+    (unless (member "native_release" (nth 2 (lip-completion-at-point))) (error "missing native helper completion"))
+    (erase-buffer)
+    (let ((skeleton-end-newline nil))
+      (lip--reverse-template "items"))
+    (unless (equal (string-trim (buffer-string)) "items[::-1]") (error "bad reverse template")))
   (with-temp-buffer
     (insert "# \"\"\"\nx = \"hash # and \\\" quote\"\ny = 8 // 2\n")
     (lip-mode) (font-lock-ensure)
@@ -96,6 +193,7 @@ call assert_equal('lipMultilineString', synIDattr(synID(3, 1, 1), 'name'))
 normal! gg=G
 call assert_equal(['flow Main() -> string {{', '  text = """', '# body {{', '  keep', '"""', '  return text', '}}'], getline(1, '$'))
 call assert_true(index(lip#Complete(0, 'par'), 'parse_number') >= 0)
+call assert_true(index(lip#Complete(0, 'native_'), 'native_data') >= 0)
 call setline(1, ['x = 8 // 2', '# comment', 'x = "# text"'])
 syntax sync fromstart
 call assert_equal('lipOperator', synIDattr(synID(1, 7, 1), 'name'))
@@ -104,6 +202,17 @@ enew!
 setfiletype lip
 LipTemplate claimfor
 call assert_equal('results = claim()', getline(1))
+enew!
+setfiletype lip
+LipTemplate reverse
+call assert_equal('items[::-1]', getline(1))
+enew!
+setfiletype lip
+LipTemplate snapshot
+call assert_equal('seen = perform effect claim.snapshot("facts")', getline(1))
+call setline(1, 'snapshot = native_data(items[0:null:2])')
+syntax sync fromstart
+call assert_equal('lipNativeHelper', synIDattr(synID(1, 12, 1), 'name'))
 execute 'edit! ' . fnameescape({json.dumps(str(source))})
 call setline(1, ['flow Main() -> number {{', '  text = "𐀀é"; return missing', '}}'])
 if line('$') > 3 | 4,$delete _ | endif
@@ -197,7 +306,7 @@ vim.cmd('qa!')
             json.loads(text)
         checked = run(["python3", EDITORS / "tools/package.py", "vscode"])
         self.assertEqual(checked.returncode, 0, checked.stderr)
-        with zipfile.ZipFile(REPO / ".build/editors/lip-language.vsix") as archive:
+        with zipfile.ZipFile(BUILD / "lip-language.vsix") as archive:
             self.assertIsNone(archive.testzip())
             self.assertIn("extension/syntaxes/lip.tmLanguage.json", archive.namelist())
             self.assertIn("extension/extension.js", archive.namelist())
@@ -206,7 +315,7 @@ vim.cmd('qa!')
     def test_tree_sitter(self):
         checked = run(["python3", EDITORS / "tools/package.py", "zed"])
         self.assertEqual(checked.returncode, 0, checked.stdout + checked.stderr)
-        grammar = REPO / ".build/editors/tree-sitter-lip"
+        grammar = BUILD / "tree-sitter-lip"
         examples = list((REPO / "examples").rglob("*.lip"))
         checked = run(["tree-sitter", "parse", *examples], cwd=grammar)
         self.assertEqual(checked.returncode, 0, checked.stdout + checked.stderr)

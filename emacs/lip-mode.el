@@ -1,7 +1,7 @@
 ;;; lip-mode.el --- Edit LIP 1.0 programs -*- lexical-binding: t; -*-
 
 ;; Package-Requires: ((emacs "27.1"))
-;; Version: 1.0.0
+;; Version: 1.0.1
 ;;; Commentary:
 ;; Add this directory to load-path and (require 'lip-mode).
 ;; C-c C-c checks, C-c C-r runs, C-c C-b builds; M-TAB completes.
@@ -32,6 +32,7 @@
 (defconst lip--builtins
   '("claim" "len" "str" "range" "map" "fold" "fail" "concat" "slice" "keys"
     "has" "put" "split" "parse_number"))
+(defconst lip--native-helpers '("native_data" "native_release"))
 (defvar lip-mode-syntax-table
   (let ((table (make-syntax-table)))
     (modify-syntax-entry ?_ "w" table)
@@ -78,7 +79,7 @@
   "Complete keywords, core functions, and names present in this buffer."
   (unless (let ((state (syntax-ppss))) (or (nth 3 state) (nth 4 state)))
     (let* ((bounds (bounds-of-thing-at-point 'symbol))
-           (names (append lip--keywords lip--types lip--builtins '("true" "false" "null"))))
+           (names (append lip--keywords lip--types lip--builtins lip--native-helpers '("true" "false" "null"))))
       (when bounds
         (save-excursion
           (goto-char (point-min))
@@ -146,11 +147,34 @@
   "Insert carry iteration." "Result binding: "
   str " = for item in " (skeleton-read "List expression: ")
   " with acc = " (skeleton-read "Seed: " "0") " {\n" > "next " _ "\n" "}" > "\n")
+(define-skeleton lip--slice-template
+  "Insert a list/string slice." "List/string expression: "
+  str "[" (skeleton-read "Start (empty to omit): ") ":"
+  (skeleton-read "Stop (exclusive, empty to omit): ") ":"
+  (skeleton-read "Step (nonzero): " "1") "]" _)
+(define-skeleton lip--reverse-template
+  "Reverse a list/string." "List/string expression: " str "[::-1]" _)
+(define-skeleton lip--indices-template
+  "Select list elements by an index list." "List expression: "
+  str "[[" (skeleton-read "Indices: " "0, -1") "]]" _)
+(define-skeleton lip--snapshot-template
+  "Observe a Claim store in the current Flow." "Snapshot binding: "
+  str " = perform effect claim.snapshot(\"" (skeleton-read "Top-level store name: " "facts") "\")" _)
+(define-skeleton lip--perform-template
+  "Construct and execute an external proposal." "Result binding: "
+  str " = perform effect " (skeleton-read "Operation (module.member): ") "(" _ ")")
+(defconst lip--templates
+  '(("flow" . lip--flow-template) ("fn" . lip--function-template)
+    ("for" . lip--loop-template) ("carry" . lip--carry-template)
+    ("slice" . lip--slice-template) ("reverse" . lip--reverse-template)
+    ("indices" . lip--indices-template) ("snapshot" . lip--snapshot-template)
+    ("perform" . lip--perform-template)))
 (defun lip-insert-template (name)
   "Insert a prompted template selected by NAME."
-  (interactive (list (completing-read "LIP template: " '("flow" "fn" "for" "carry") nil t)))
-  (call-interactively (cdr (assoc name '(("flow" . lip--flow-template) ("fn" . lip--function-template)
-                                       ("for" . lip--loop-template) ("carry" . lip--carry-template))))))
+  (interactive (list (completing-read "LIP template: " lip--templates nil t)))
+  (let ((template (cdr (assoc name lip--templates))))
+    (unless template (user-error "Unknown LIP template: %s" name))
+    (call-interactively template)))
 
 (defvar lip-mode-map
   (let ((map (make-sparse-keymap)))
@@ -178,7 +202,8 @@
                  (":\\s-*\\(any\\|bool\\|number\\|string\\|list\\|object\\|function\\|effect\\)\\_>" 1 font-lock-type-face)
                  ("->\\s-*\\(any\\|bool\\|number\\|string\\|list\\|object\\|function\\|effect\\|void\\|null\\)\\_>" 1 font-lock-type-face)
                  ("\\_<\\(?:0\\|[1-9][0-9]*\\)\\(?:\\.[0-9]+\\)?\\(?:[eE][+-]?[0-9]+\\)?\\_>" . font-lock-constant-face)
-                 (,(regexp-opt lip--builtins 'symbols) . font-lock-builtin-face))))
+                 (,(regexp-opt lip--builtins 'symbols) . font-lock-builtin-face)
+                 (,(concat (regexp-opt lip--native-helpers 'symbols) "\\s-*(") 1 font-lock-builtin-face))))
   (setq-local imenu-create-index-function #'lip--imenu-index)
   (setq-local beginning-of-defun-function
               (lambda (&optional arg) (re-search-backward "^[ \t]*\\(?:export[ \t]+\\)?\\(?:fn\\|flow\\)\\_>" nil 'move (or arg 1))))

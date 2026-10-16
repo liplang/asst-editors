@@ -1,7 +1,7 @@
 " Shared Vim 9 / Neovim runtime. No plugin manager or language server required.
 let s:save_cpo = &cpoptions
 set cpoptions&vim
-let s:words = split('import as flow fn return if else match for in parallel break continue with next effect perform export void true false null any bool number string list object function claim len str range map fold fail concat slice keys has put split parse_number')
+let s:words = split('import as flow fn return if else match for in parallel break continue with next effect perform export void true false null any bool number string list object function claim len str range map fold fail concat slice keys has put split parse_number native_data native_release')
 let s:templates = {
       \ 'flow': ['flow Main() -> any {', '  return null', '}'],
       \ 'fn': ['fn name(value: number) -> number {', '  value', '}'],
@@ -11,6 +11,15 @@ let s:templates = {
       \ 'claimfor': ['results = claim()', 'for item in items parallel {', '  results <+ item', '}'],
       \ 'match': ['match value {', '  null => 0,', '  _ => 1', '}'],
       \ 'importlip': ['import lip "lib/module.lip" as module'],
+      \ 'perform': ['result = perform effect module.operation()'],
+      \ 'performproposal': ['result = perform proposal'],
+      \ 'slice': ['items[0:null:1]'],
+      \ 'reverse': ['items[::-1]'],
+      \ 'indices': ['items[[0, -1]]'],
+      \ 'snapshot': ['seen = perform effect claim.snapshot("facts")'],
+      \ 'nativedata': ['snapshot = native_data(resource)'],
+      \ 'nativerelease': ['native_release(resource)'],
+      \ 'exportdata': ['export answer: number = 42'],
       \ 'text': ['"""', '', '"""']}
 
 function! lip#TemplateNames(lead, line, pos) abort

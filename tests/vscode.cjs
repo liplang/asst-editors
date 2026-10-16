@@ -33,7 +33,7 @@ const mock = {
   workspace: {
     isTrusted: true,
     getConfiguration() { return { get(key, fallback) {
-      if (key === 'checkerPath') return path.resolve(__dirname, '../../.build/editors/bin/lipcheck');
+      if (key === 'checkerPath') return path.join(process.env.LIP_EDITOR_BUILD || path.resolve(__dirname, '../.build'), 'bin/lipcheck');
       return fallback;
     } }; },
     getWorkspaceFolder() {},
@@ -79,6 +79,17 @@ async function until(predicate) {
   const context = { subscriptions: [] };
   extension.activate(context);
   assert(providers.completion.provideCompletionItems().some(item => item.label === 'parse_number'));
+  const completions = providers.completion.provideCompletionItems();
+  assert.match(completions.find(item => item.label === 'slice').documentation, /step/);
+  assert.match(completions.find(item => item.label === 'native_data').documentation, /effectful/);
+  assert.match(completions.find(item => item.label === 'native_release').documentation, /close\/commit\/rollback/);
+  const hoverRange = new Range(0, 0, 0, 5);
+  mock.Hover = class { constructor(contents, range) { this.contents = contents; this.range = range; } };
+  const hover = word => providers.hover.provideHover({
+    getWordRangeAtPosition() { return hoverRange; }, getText() { return word; },
+  }, new Position(0, 0));
+  assert.match(hover('slice').contents, /null/);
+  assert.match(hover('native_data').contents, /shadow/);
   const sample = '# fn comment() -> any {}\ntext = """\nflow fake() -> void {}\n"""\nflow Main() -> void {}';
   const mask = extension.codeMask(sample);
   assert.equal(mask.length, sample.length);

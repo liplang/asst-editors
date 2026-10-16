@@ -3,6 +3,7 @@ const vscode = require('vscode');
 const path = require('path');
 const { spawn } = require('child_process');
 const data = require('./language-data.json');
+const functions = { ...data.builtins, ...data.nativeHelpers };
 
 // Mask strings/comments while preserving offsets and line breaks for symbols.
 function codeMask(text) {
@@ -137,7 +138,7 @@ function activate(context) {
       return data.keywords.map(word => new vscode.CompletionItem(word, vscode.CompletionItemKind.Keyword))
         .concat(data.types.map(word => new vscode.CompletionItem(word, vscode.CompletionItemKind.TypeParameter)))
         .concat(['true', 'false', 'null', 'claim'].map(word => new vscode.CompletionItem(word, vscode.CompletionItemKind.Constant)))
-        .concat(Object.entries(data.builtins).map(([word, description]) => {
+        .concat(Object.entries(functions).map(([word, description]) => {
           const item = new vscode.CompletionItem(word, vscode.CompletionItemKind.Function);
           item.documentation = description;
           return item;
@@ -147,7 +148,7 @@ function activate(context) {
   context.subscriptions.push(vscode.languages.registerHoverProvider('lip', {
     provideHover(document, position) {
       const range = document.getWordRangeAtPosition(position, /[A-Za-z_][A-Za-z0-9_]*/);
-      const text = range && data.builtins[document.getText(range)];
+      const text = range && functions[document.getText(range)];
       if (text) return new vscode.Hover(text, range);
     },
   }));

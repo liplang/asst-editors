@@ -1,15 +1,16 @@
-ROOT := $(abspath ..)
-BUILD := $(ROOT)/.build/editors
-export GOCACHE := $(ROOT)/.build/cache
-export GOTMPDIR := $(ROOT)/.build/tmp
-export GOPATH := $(ROOT)/.build/gopath
+ROOT := $(CURDIR)
+BUILD ?= $(ROOT)/.build
+export LIP_EDITOR_BUILD := $(abspath $(BUILD))
+export GOCACHE := $(LIP_EDITOR_BUILD)/cache
+export GOTMPDIR := $(LIP_EDITOR_BUILD)/tmp
+export GOPATH := $(LIP_EDITOR_BUILD)/gopath
 
 .PHONY: all tools generate test clean
 all: tools
 tools:
 	@mkdir -p "$(BUILD)/bin" "$(GOCACHE)" "$(GOTMPDIR)" "$(GOPATH)"
-	cd "$(ROOT)" && go build -o "$(BUILD)/bin/lipcheck" ./editors/tools/lipcheck
-	cd "$(ROOT)" && go build -o "$(BUILD)/bin/lipc" ./cmd/lipc
+	go build -buildvcs=false -o "$(BUILD)/bin/lipcheck" ./tools/lipcheck
+	go build -buildvcs=false -o "$(BUILD)/bin/lipc" lip/cmd/lipc
 generate:
 	python3 tools/generate.py
 test: tools

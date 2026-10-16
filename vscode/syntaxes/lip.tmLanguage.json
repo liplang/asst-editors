@@ -97,6 +97,10 @@
           "match": "(?<![\\w.])(?:claim|len|str|range|map|fold|fail|concat|slice|keys|has|put|split|parse_number)\\b"
         },
         {
+          "name": "support.function.native.lip",
+          "match": "(?<![\\w.])(?:native_data|native_release)\\b(?=\\s*\\()"
+        },
+        {
           "name": "entity.name.function.call.lip",
           "match": "\\b[A-Za-z_][A-Za-z0-9_]*(?=\\s*\\()"
         },

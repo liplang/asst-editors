@@ -12,7 +12,7 @@ import (
 
 func main() {
 	flags := flag.NewFlagSet("lipcheck", flag.ContinueOnError)
-	entry := flags.String("entry", "", "Flow entry (required for multiple Flows)")
+	entry := flags.String("entry", "", "root Flow entry (default Main, otherwise the sole root Flow)")
 	project := flags.String("project", "", "static import project root (default: file directory)")
 	hostName := flags.String("host", "", "Host: empty or demo")
 	flags.Usage = func() {

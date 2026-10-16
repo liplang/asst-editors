@@ -55,11 +55,15 @@
     },
     {
       "trigger": "importhost",
-      "contents": "import host \"${1:service@1}\" as ${0:service}"
+      "contents": "import host \"${1:service}\" as ${0:service}"
     },
     {
       "trigger": "perform",
-      "contents": "${1:result} = perform ${2:module}.${3:operation}(${0})"
+      "contents": "${1:result} = perform effect ${2:module}.${3:operation}(${0})"
+    },
+    {
+      "trigger": "performproposal",
+      "contents": "${1:result} = perform ${0:proposal}"
     },
     {
       "trigger": "effect",
@@ -73,6 +77,34 @@
       "trigger": "text",
       "contents": "\"\"\"\n$0\n\"\"\""
     },
+    {
+      "trigger": "slice",
+      "contents": "${1:items}[${2:0}:${3:null}:${4:1}]$0"
+    },
+    {
+      "trigger": "reverse",
+      "contents": "${1:items}[::-1]$0"
+    },
+    {
+      "trigger": "indices",
+      "contents": "${1:items}[[${2:0}, ${3:-1}]]$0"
+    },
+    {
+      "trigger": "snapshot",
+      "contents": "${1:seen} = perform effect claim.snapshot(\"${2:facts}\")$0"
+    },
+    {
+      "trigger": "nativedata",
+      "contents": "${1:snapshot} = native_data(${0:resource})"
+    },
+    {
+      "trigger": "nativerelease",
+      "contents": "native_release(${0:resource})"
+    },
+    {
+      "trigger": "exportdata",
+      "contents": "export ${1:answer}: ${2:number} = ${0:42}"
+    },
     "len",
     "str",
     "range",
@@ -85,6 +117,8 @@
     "has",
     "put",
     "split",
-    "parse_number"
+    "parse_number",
+    "native_data",
+    "native_release"
   ]
 }

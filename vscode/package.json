@@ -2,7 +2,7 @@
   "name": "lip-language",
   "displayName": "LIP 1.0",
   "description": "LIP syntax, snippets, completion, core documentation, symbols, static checks and execution tasks.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "publisher": "lip-local",
   "engines": {"vscode": "^1.85.0"},
   "categories": ["Programming Languages", "Snippets"],
@@ -25,7 +25,7 @@
         "lip.compilerPath": {"type": "string", "default": "lipc", "scope": "resource", "description": "lipc executable; supports ${workspaceFolder} and ${fileDirname}."},
         "lip.checkerPath": {"type": "string", "default": "lipcheck", "scope": "resource", "description": "Compile-only checker from editors/tools/lipcheck."},
         "lip.arguments": {"type": "array", "items": {"type": "string"}, "default": [], "scope": "resource", "description": "Common compiler flags, e.g. [\"-entry\", \"Main\", \"-host\", \"demo\"]. Each argument is a separate array entry."},
-        "lip.runArguments": {"type": "array", "items": {"type": "string"}, "default": [], "scope": "resource", "description": "Run-only flags, e.g. [\"-input\", \"{\\\"name\\\":\\\"Ada\\\"}\"]."},
+        "lip.runArguments": {"type": "array", "items": {"type": "string"}, "default": [], "scope": "resource", "description": "Run-only flags: -input or -entry-input, -entry-output, -parallel, -steps, -elements, -frames. Each argument is a separate array entry."},
         "lip.projectRoot": {"type": "string", "default": "", "scope": "resource", "description": "Static import root; empty uses the source directory. Supports ${workspaceFolder}."},
         "lip.checkOnSave": {"type": "boolean", "default": false, "scope": "resource", "description": "Compile saved LIP files in trusted workspaces. Checks do not run the Flow; native import discovery may start Go/Python."}
       }

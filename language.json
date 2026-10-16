@@ -9,12 +9,16 @@
     "fold": "fold(xs, seed, f): strict left fold; f(accumulator, element).",
     "fail": "fail(message): stop with E-FAIL; no successful value.",
     "concat": "concat(a, b): concatenate two lists into a new list.",
-    "slice": "slice(value, start, end): half-open list/string slice; safe nonnegative indices.",
+    "slice": "slice(value, start, stop[, step]): half-open list/string slice. Negative bounds count from the end, bounds are clipped, null omits a component, and step is a nonzero safe integer (default 1). Strings count Unicode scalar values; slice(value, null, null, -1) reverses.",
     "keys": "keys(object): string keys sorted by UTF-8 bytes.",
     "has": "has(object, key): check whether a string key exists.",
     "put": "put(object, key, value): return a new object with that field added or replaced.",
     "split": "split(text, separator): nonempty separator; preserves empty parts.",
     "parse_number": "parse_number(text): complete ASCII numeric text → finite number."
+  },
+  "nativeHelpers": {
+    "native_data": "native_data(resource): obtain a finite, acyclic Data snapshot through the native Host. This is an effectful convenience helper, not a core pure function; a local declaration or binding can shadow it.",
+    "native_release": "native_release(resource): release a native reference through the native Host. This is effectful, can be shadowed, and does not replace the object's close/commit/rollback operation."
   },
   "snippets": {
     "Flow": {"prefix": "flow", "body": ["flow ${1:Main}(${2}) -> ${3:any} {", "  return ${0:null}", "}"], "description": "Named Flow with a result"},
@@ -30,10 +34,18 @@
     "LIP import": {"prefix": "importlip", "body": "import lip \"${1:lib/module.lip}\" as ${0:module}", "description": "Static LIP module import"},
     "Python import": {"prefix": "importpy", "body": "import python \"${1:math}\" as ${0:math}", "description": "Python module import"},
     "Go import": {"prefix": "importgo", "body": "import go \"${1:strings}\" as ${0:strings}", "description": "Go package import"},
-    "Host import": {"prefix": "importhost", "body": "import host \"${1:service@1}\" as ${0:service}", "description": "Registered Host contract import"},
-    "Perform": {"prefix": "perform", "body": "${1:result} = perform ${2:module}.${3:operation}(${0})", "description": "Execute an external operation"},
+    "Host import": {"prefix": "importhost", "body": "import host \"${1:service}\" as ${0:service}", "description": "Registered Host path; contract version is provided by the Host registry"},
+    "Perform": {"prefix": "perform", "body": "${1:result} = perform effect ${2:module}.${3:operation}(${0})", "description": "Construct and execute an external operation proposal"},
+    "Perform proposal": {"prefix": "performproposal", "body": "${1:result} = perform ${0:proposal}", "description": "Execute an existing proposal"},
     "Proposal": {"prefix": "effect", "body": "${1:proposal} = effect ${2:module}.${3:operation}(${0})", "description": "Construct a proposal without executing it"},
     "Pipeline": {"prefix": "pipe", "body": "${1:value} |> ${2:stage}(${0})", "description": "Static pipeline stage; input is its first argument"},
-    "Multiline string": {"prefix": "text", "body": ["\"\"\"", "$0", "\"\"\""], "description": "Multiline string; indentation is part of its value"}
+    "Multiline string": {"prefix": "text", "body": ["\"\"\"", "$0", "\"\"\""], "description": "Multiline string; indentation is part of its value"},
+    "Slice": {"prefix": "slice", "body": "${1:items}[${2:0}:${3:null}:${4:1}]$0", "description": "Half-open list/string slice; null omits a bound, step can be negative"},
+    "Reverse": {"prefix": "reverse", "body": "${1:items}[::-1]$0", "description": "Reverse a list or Unicode scalar string"},
+    "Index list": {"prefix": "indices", "body": "${1:items}[[${2:0}, ${3:-1}]]$0", "description": "Select list elements in order, preserving duplicates and allowing negative indices"},
+    "Claim snapshot": {"prefix": "snapshot", "body": "${1:seen} = perform effect claim.snapshot(\"${2:facts}\")$0", "description": "Observe currently committed facts in a top-level Claim store of this Flow; does not wait for future writers"},
+    "Native Data snapshot": {"prefix": "nativedata", "body": "${1:snapshot} = native_data(${0:resource})", "description": "Effectful native Host helper; obtain a finite, acyclic Data snapshot"},
+    "Release native reference": {"prefix": "nativerelease", "body": "native_release(${0:resource})", "description": "Effectful native Host helper; release a reference after explicit business cleanup"},
+    "Export static data": {"prefix": "exportdata", "body": "export ${1:answer}: ${2:number} = ${0:42}", "description": "Export a typed static Data literal from a declaration module"}
   }
 }

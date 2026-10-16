@@ -5,6 +5,7 @@ syntax case match
 syntax keyword lipKeyword import as flow fn return if else match for in parallel break continue with next effect perform export void
 syntax keyword lipConstant true false null
 syntax keyword lipBuiltin claim len str range map fold fail concat slice keys has put split parse_number
+syntax match lipNativeHelper /\<\%(native_data\|native_release\)\>\ze\s*(/
 syntax match lipType /\%(:\|->\)\s*\zs\%(any\|bool\|number\|string\|list\|object\|function\|effect\|void\|null\)\>\%(?\)\?/
 syntax match lipFunction /\<\%(fn\|flow\)\s\+\zs[A-Za-z_][A-Za-z0-9_]*/
 syntax match lipNumber /\<\%(0\|[1-9][0-9]*\)\%(\.[0-9]\+\)\?\%([eE][+-]\?[0-9]\+\)\?\>/
@@ -19,6 +20,7 @@ syntax sync fromstart
 highlight default link lipKeyword Keyword
 highlight default link lipConstant Constant
 highlight default link lipBuiltin Function
+highlight default link lipNativeHelper Function
 highlight default link lipType Type
 highlight default link lipFunction Function
 highlight default link lipNumber Number

@@ -38,11 +38,15 @@
     "fold": "fold(xs, seed, f): strict left fold; f(accumulator, element).",
     "fail": "fail(message): stop with E-FAIL; no successful value.",
     "concat": "concat(a, b): concatenate two lists into a new list.",
-    "slice": "slice(value, start, end): half-open list/string slice; safe nonnegative indices.",
+    "slice": "slice(value, start, stop[, step]): half-open list/string slice. Negative bounds count from the end, bounds are clipped, null omits a component, and step is a nonzero safe integer (default 1). Strings count Unicode scalar values; slice(value, null, null, -1) reverses.",
     "keys": "keys(object): string keys sorted by UTF-8 bytes.",
     "has": "has(object, key): check whether a string key exists.",
     "put": "put(object, key, value): return a new object with that field added or replaced.",
     "split": "split(text, separator): nonempty separator; preserves empty parts.",
     "parse_number": "parse_number(text): complete ASCII numeric text → finite number."
+  },
+  "nativeHelpers": {
+    "native_data": "native_data(resource): obtain a finite, acyclic Data snapshot through the native Host. This is an effectful convenience helper, not a core pure function; a local declaration or binding can shadow it.",
+    "native_release": "native_release(resource): release a native reference through the native Host. This is effectful, can be shadowed, and does not replace the object's close/commit/rollback operation."
   }
 }

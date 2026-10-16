@@ -47,6 +47,7 @@ grammar = {
             {"name": "keyword.control.lip", "match": words(data["keywords"])},
             {"name": "constant.language.lip", "match": words(["true", "false", "null"])},
             {"name": "support.function.builtin.lip", "match": r"(?<![\w.])(?:" + "|".join(["claim"] + list(data["builtins"])) + r")\b"},
+            {"name": "support.function.native.lip", "match": r"(?<![\w.])(?:" + "|".join(data["nativeHelpers"]) + r")\b(?=\s*\()"},
             {"name": "entity.name.function.call.lip", "match": r"\b[A-Za-z_][A-Za-z0-9_]*(?=\s*\()"},
             {"name": "constant.numeric.lip", "match": number},
             {"name": "keyword.operator.lip", "match": operator},
@@ -70,7 +71,7 @@ write("vscode/language-configuration.json", {
         "decreaseIndentPattern": r"^\s*[}\])]",
     },
 })
-write("vscode/language-data.json", {key: data[key] for key in ["keywords", "types", "builtins"]})
+write("vscode/language-data.json", {key: data[key] for key in ["keywords", "types", "builtins", "nativeHelpers"]})
 write("zed/snippets/lip.json", data["snippets"])
 sublime = {
     "name": "LIP", "file_extensions": ["lip"], "scope": "source.lip", "version": 2,
@@ -96,6 +97,6 @@ write("sublime/LIP.sublime-completions", {
     "scope": "source.lip - string - comment",
     "completions": [{"trigger": snippet["prefix"], "contents": "\n".join(snippet["body"])
                      if isinstance(snippet["body"], list) else snippet["body"]}
-                    for snippet in data["snippets"].values()] + list(data["builtins"]),
+                    for snippet in data["snippets"].values()] + list(data["builtins"]) + list(data["nativeHelpers"]),
 })
 print("Generated VS Code, Zed snippets, and Sublime Text assets.")

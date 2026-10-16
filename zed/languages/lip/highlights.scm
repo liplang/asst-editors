@@ -23,6 +23,8 @@
  (anonymous_function return_type: _ @type)]
 ((identifier) @function.builtin
  (#match? @function.builtin "^(claim|len|str|range|map|fold|fail|concat|slice|keys|has|put|split|parse_number)$"))
+((identifier) @function
+ (#match? @function "^(native_data|native_release)$"))
 [("(") (")") ("[") ("]") ("{") ("}")] @punctuation.bracket
 (punctuation) @punctuation.delimiter
 (operator) @operator

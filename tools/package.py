@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""Build local VSIX or Zed dev extension; all output stays under .build/editors."""
+"""Build local VSIX or Zed dev extension under the editors build directory."""
 import argparse
 import json
+import os
 import shutil
 import subprocess
 import zipfile
@@ -9,7 +10,7 @@ from pathlib import Path
 from xml.sax.saxutils import escape
 
 ROOT = Path(__file__).resolve().parents[1]
-BUILD = ROOT.parent / ".build" / "editors"
+BUILD = Path(os.environ.get("LIP_EDITOR_BUILD", ROOT / ".build")).resolve()
 
 
 def vscode():
@@ -65,7 +66,7 @@ def zed():
     shutil.copytree(ROOT / "zed/languages", target / "languages", dirs_exist_ok=True)
     shutil.copytree(ROOT / "zed/snippets", target / "snippets", dirs_exist_ok=True)
     (target / "extension.toml").write_text(
-        'id = "lip"\nname = "LIP"\nversion = "1.0.0"\nschema_version = 1\n'
+        'id = "lip"\nname = "LIP"\nversion = "1.0.1"\nschema_version = 1\n'
         'description = "LIP 1.0 syntax, indentation and outline"\nauthors = ["LIP contributors"]\n'
         'languages = ["languages/lip"]\n\n[grammars.lip]\n'
         f'repository = {json.dumps(grammar.as_uri())}\nrev = {json.dumps(rev)}\n', encoding="utf-8"
